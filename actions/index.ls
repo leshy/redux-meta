@@ -1,0 +1,2 @@
+require! { './resource' }
+export resource
