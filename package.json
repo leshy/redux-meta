@@ -1,0 +1,15 @@
+{
+  "name": "redux-meta",
+  "version": "1.0.0",
+  "description": "redux-meta",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "lesh <lesh@sysphere.org> (http://lesh.sysphere.org)",
+  "license": "ISC"
+}
