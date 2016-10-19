@@ -9,10 +9,12 @@ require! {
 { type: 'resource_properties', verb: 'del', data: 124124 }
 
 #
+
+# properties: defineResource 'properties', Collection()
 # properties: defineResource 'properties', Collection()
 # 
 
-export defineResource = (name, reducer) ->
+export define = (name, reducer) ->
   (state, action) ->
     if action.type isnt "resource_#{ name }" and action.type isnt '@@INIT' then state
     else reducer state, action
