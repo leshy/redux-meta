@@ -1,6 +1,6 @@
 require! {
   leshdash: { defaultsDeep }
-  immutable: { OrderedMap, fromJS: immutable }: i
+  immutable: { fromJS: immutable }: i
 }
 
 export Resource = (options={}, next) ->
@@ -15,16 +15,16 @@ export Resource = (options={}, next) ->
       | "error" => { state: 'error', data: state?data, error: action.payload }
       | otherwise => if next then next(state, action) else state
         
-export OrderedMapResource = (options={}, next) ->
+export OrderedMap = (options={}, next) ->
   Resource options, (state, action) ->
     switch action.type
-      | "@@INIT" => state: 'empty', data: OrderedMap()
+      | "@@INIT" => state: 'empty', data: i.OrderedMap()
       | otherwise => if next then next(state, action) else state
       
 export TailCollection = (options={}, next) ->
   { limit } = defaultsDeep options, { limit: Infinity }
   
-  OrderedMapResource options, (state,action) ->
+  OrderedMap options, (state,action) ->
     switch action.verb
       | 'push' =>
         { data } = state
