@@ -1,49 +1,30 @@
 require! {
+  leshdash: { defaultsDeep }
   immutable: { OrderedMap, fromJS: immutable }: i
-  leshdash: { defaultsDeep, push, pop, assign, pick, mapKeys, mapValues, assign, omit, map, curry, times, tail }
 }
 
-{ type: 'resource_properties', verb: 'empty' }
-{ type: 'resource_properties', verb: 'add', data: { id: 124124, sadg: 3 } }
-{ type: 'resource_properties', verb: 'update', data: { id: 124124, sadg: 1 } }
-{ type: 'resource_properties', verb: 'del', data: 124124 }
-
-#
-
-# properties: defineResource 'properties', Collection()
-# properties: defineResource 'properties', Collection()
-# 
-
-export define = (name, reducer) ->
+export Resource = (options={}, next) ->
+  { name } = options
   (state, action) ->
-    if action.type isnt "resource_#{ name }" and action.type isnt '@@INIT' then state
-    else reducer state, action
-
-export RemoteResource = ->
-  (state, action) ->
-    if action.type is '@@INIT' then return state: 'empty'
+    
+    if action.type not in [ '@@INIT', "resource_#{ name }" ] then return state
+    if action.type is '@@INIT' then
+      state = { state: 'empty' }  
     switch action.verb
       | "loading" => { state: 'loading', data: state?data }
       | "error" => { state: 'error', data: state?data, error: action.payload }
-      | otherwise => state
+      | otherwise => if next then next(state, action) else state
         
-export OrderedCollection = (options={}) ->
-  remoteResource = RemoteResource options
-  
-  (state, action) ->
-    state = remoteResource ... 
+export OrderedMapResource = (options={}, next) ->
+  Resource options, (state, action) ->
     switch action.type
       | "@@INIT" => state: 'empty', data: OrderedMap()
-      | otherwise => state
+      | otherwise => if next then next(state, action) else state
       
-export TailCollection = (options={}) ->
+export TailCollection = (options={}, next) ->
   { limit } = defaultsDeep options, { limit: Infinity }
   
-  orderedCollection = OrderedCollection()
-  
-  (state,action) ->
-    state = orderedCollection ...
-    
+  OrderedMapResource options, (state,action) ->
     switch action.verb
       | 'push' =>
         { data } = state
@@ -56,14 +37,10 @@ export TailCollection = (options={}) ->
           state: 'data'
           data: if data.size <= limit then data else data.slice limit - data.size
           
-      | otherwise => state
+      | otherwise => if next then next(state, action) else state
     
-export Collection = (options={}) ->
-  tailCollection = TailCollection options
-  
-  (state, action) ->
-    state = tailCollection ...
-    
+export Collection = (options={}, next) ->
+  TailCollection options, (state, action) ->
     switch action.verb
       | 'del' =>
         { id } = action.payload
@@ -78,6 +55,6 @@ export Collection = (options={}) ->
           state: 'data'
           data: data.mergeIn [id], payload
           
-      | otherwise => state
+      | otherwise => if next then next(state, action) else state
 
 

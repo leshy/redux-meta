@@ -14,11 +14,9 @@ require! {
 describe 'reducers', -> 
   describe 'meta', ->
     
-    { define } = resource
-  
-    remoteResource = ->
+    Resource = ->
       before ->
-        if not @c then @c = define 'somename', resource.RemoteResource()
+        if not @c then @c = resource.Resource name: 'somename'
 
       specify 'loading', ->
         @state = @c @state, { type: 'resource_somename', verb: 'loading' }
@@ -40,9 +38,9 @@ describe 'reducers', ->
 
     tailCollection = ->
       before ->
-        if not @c then @c = define 'somename', resource.TailCollection limit: 3
+        if not @c then @c = resource.TailCollection limit: 3, name: 'somename'
 
-      remoteResource()
+      Resource()
 
       specify 'init', ->
         @state = state = @c void, { type: "@@INIT" }
@@ -74,13 +72,13 @@ describe 'reducers', ->
         .to.equal '{"4":{"id":4,"something":"else4"},"5":{"id":5,"something":"else5"},"6":{"id":6,"something":"else6"}}'
 
     
-    describe 'remoteResource', -> remoteResource()
+    describe 'remoteResource', -> Resource()
 
     describe 'TailCollection', -> tailCollection()
 
     describe 'Collection', ->
       before ->
-        if not @c then @c = define 'somename', resource.Collection limit: 3
+        if not @c then @c = resource.Collection limit: 3, name: 'somename'
 
       tailCollection()
 
