@@ -8,10 +8,10 @@ require! {
 }
 
 require! {
-  '../index.ls': { reducers, actions, define }: reduxMeta
+  '../index.ls': { define }: reduxMeta
 }
 
 describe 'reduxMeta', ->
   specify 'init', ->
-    console.log reduxMeta.define reducers.resource.Collection, actions.resource.Collection, do
+    console.log reduxMeta.define reduxMeta.reducers.Collection, reduxMeta.actions.Collection, do
       name: 'property'

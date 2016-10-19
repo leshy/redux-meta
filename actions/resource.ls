@@ -1,23 +1,23 @@
 
 SimpleAction = ({ name }, data, payload) -->
-  ret = { type: "resource_#{ name }" } <<< data <<< (if payload then payload: payload else {})
+  (payload) -> { type: "resource_#{ name }" } <<< data <<< (if payload then payload: payload else {})
 
 export Resource = (options) ->
   sa = SimpleAction options
   
   do
-    empty = -> sa verb: 'empty'
-    loading = -> sa verb: 'loading'
-    error = -> sa verb: 'error', it
+    empty: sa verb: 'empty'
+    loading: sa verb: 'loading'
+    error: sa verb: 'error'
 
 export TailCollection = (options) ->
   Resource(options) <<< do
-    push: -> SimpleAction options, verb: 'push', it
+    push: SimpleAction options, verb: 'push'
 
 export Collection = (options) ->
   sa = SimpleAction options
   
   TailCollection(options) <<< do
-    del: -> sa verb: 'del', it
-    update: -> sa verb: 'update', it
+    del: sa verb: 'del'
+    update: sa verb: 'update'
                   

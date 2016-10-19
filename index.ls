@@ -11,5 +11,3 @@ export define = (metaReducer, metaAction, options) ->
     reducers: metaReducer options
 
 
-
-console.log module.exports

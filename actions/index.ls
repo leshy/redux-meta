@@ -1,2 +1,2 @@
-require! { './resource' }
-export resource
+module.exports <<< require './resource'
+
