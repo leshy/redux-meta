@@ -28,7 +28,7 @@ export TailCollection = (options={}, next) ->
   
   OrderedMap options, (state,action) ->
     switch action.verb
-      | 'push' =>
+      | 'create' =>
         { data } = state
         { payload } = action
         { id } = payload
@@ -44,7 +44,7 @@ export TailCollection = (options={}, next) ->
 export Collection = (options={}, next) ->
   TailCollection options, (state, action) ->
     switch action.verb
-      | 'del' =>
+      | 'remove' =>
         { id } = action.payload
         { state: 'data', data: state.data.remove id }
         
@@ -58,5 +58,4 @@ export Collection = (options={}, next) ->
           data: data.mergeIn [id], payload
           
       | _ => if next then next(state, action) else state
-
 

@@ -10,4 +10,3 @@ export define = (metaReducer, metaAction, options) ->
     actions: metaAction options
     reducers: metaReducer options
 
-

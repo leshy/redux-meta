@@ -46,7 +46,7 @@ describe 'reducers', ->
         @state = state = @c void, { type: "@@INIT" }
 
         expect state
-        .to.be.an.instanceOf(Object)
+        .to.be.an.instanceOf Object
 
         expect state.state
         .to.equal 'empty'
@@ -54,19 +54,19 @@ describe 'reducers', ->
         expect state.data
         .to.be.instanceOf OrderedMap
 
-      specify 'push', ->
-        @state = @c @state, { type: 'resource_somename', verb: 'push', payload: { id: 1, something: 'else' } }
+      specify 'create', ->
+        @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 1, something: 'else' } }
 
         expect JSON.stringify @state
         .to.equal '{"state":"data","data":{"1":{"id":1,"something":"else"}}}'
 
       specify 'limit', ->
 
-        @state = @c @state, { type: 'resource_somename', verb: 'push', payload: { id: 2, something: 'else2' } }
-        @state = @c @state, { type: 'resource_somename', verb: 'push', payload: { id: 3, something: 'else3' } }
-        @state = @c @state, { type: 'resource_somename', verb: 'push', payload: { id: 4, something: 'else4' } }
-        @state = @c @state, { type: 'resource_somename', verb: 'push', payload: { id: 5, something: 'else5' } }
-        @state = @c @state, { type: 'resource_somename', verb: 'push', payload: { id: 6, something: 'else6' } }
+        @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 2, something: 'else2' } }
+        @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 3, something: 'else3' } }
+        @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 4, something: 'else4' } }
+        @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 5, something: 'else5' } }
+        @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 6, something: 'else6' } }
 
         expect JSON.stringify @state.data
         .to.equal '{"4":{"id":4,"something":"else4"},"5":{"id":5,"something":"else5"},"6":{"id":6,"something":"else6"}}'
@@ -82,8 +82,8 @@ describe 'reducers', ->
 
       tailCollection()
 
-      specify 'del', ->
-        @state = @c @state, { type: 'resource_somename', verb: 'del', payload: { id: 5 }}
+      specify 'remove', ->
+        @state = @c @state, { type: 'resource_somename', verb: 'remove', payload: { id: 5 }}
         expect JSON.stringify @state
         .to.equal '{"state":"data","data":{"4":{"id":4,"something":"else4"},"6":{"id":6,"something":"else6"}}}'
 

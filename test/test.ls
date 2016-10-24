@@ -7,11 +7,12 @@ require! {
   immutable: { OrderedMap }:i
 }
 
-require! {
-  '../index.ls': { define }: reduxMeta
-}
+require! { '../index.ls': { define }: reduxMeta }
 
 describe 'reduxMeta', ->
   specify 'init', ->
-    console.log reduxMeta.define reduxMeta.reducers.Collection, reduxMeta.actions.Collection, do
+    { actions, reducers } = reduxMeta.define reduxMeta.reducers.Collection, reduxMeta.actions.Collection, do
       name: 'property'
+
+    console.log property: actions
+    console.log property: reducers
