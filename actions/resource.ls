@@ -26,7 +26,6 @@ export Collection = (options) ->
     remove: sa verb: 'remove'
     update: sa verb: 'update'
 
-
 class Rest
   remove: (name, id) -> new p (resolve,reject) ~> resolve true
   create: (name, id) -> new p (resolve,reject) ~> resolve true

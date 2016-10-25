@@ -33,7 +33,7 @@ describe 'fullSailsIntegration', ->
         'redux-thunk'
       }
 
-      { reducer, @actions } = reduxMeta.define do
+      { reducers, @actions } = reduxMeta.define do
         reduxMeta.reducers.Collection
         reduxMeta.actions.SailsCollection
 
@@ -41,7 +41,7 @@ describe 'fullSailsIntegration', ->
         io: @io
 
       @store = redux.createStore do
-        redux.combineReducers testmodel: reducer
+        redux.combineReducers reducers
         {}
         redux.applyMiddleware(reduxThunk.default)
 
