@@ -50,7 +50,7 @@ describe 'reduxMeta', ->
 
     l.log 'dispatch create action'
     
-    store.dispatch actions.create payload: { id: 3, lala: 213 }
+    store.dispatch actions.create id: 3, lala: 213
     
     wait 1000, -> 
       console.log state: store.getState()

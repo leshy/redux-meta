@@ -5,10 +5,8 @@ require! {
   leshdash: { head, rpad, lazy, union, assign, omit, map, curry, times, keys, first, wait, head }
   bluebird: p
   immutable: { OrderedMap }:i
-}
-
-require! {
-  '../reducers/resource': resource
+  'mocha-logger': l
+  '../index.ls': { reducers }:reduxMeta
 }
 
 describe 'reducers', -> 
@@ -16,7 +14,7 @@ describe 'reducers', ->
     
     Resource = ->
       before ->
-        if not @c then @c = resource.Resource name: 'somename'
+        if not @c then @c = reducers.Resource name: 'somename'
 
       specify 'loading', ->
         @state = @c @state, { type: 'resource_somename', verb: 'loading' }
@@ -38,7 +36,7 @@ describe 'reducers', ->
 
     tailCollection = ->
       before ->
-        if not @c then @c = resource.TailCollection limit: 3, name: 'somename'
+        if not @c then @c = reducers.TailCollection limit: 3, name: 'somename'
 
       Resource()
 
@@ -78,7 +76,7 @@ describe 'reducers', ->
 
     describe 'Collection', ->
       before ->
-        if not @c then @c = resource.Collection limit: 3, name: 'somename'
+        if not @c then @c = reducers.Collection limit: 3, name: 'somename'
 
       tailCollection()
 
@@ -94,4 +92,36 @@ describe 'reducers', ->
 
 
 
+describe 'storeIntegration', ->
+  specify 'create', ->
+    require! {
+      redux
+      'redux-thunk'
+    }
 
+    opts = do
+      name: 'testmodel'
+      io: @io
+      
+    reducer = reduxMeta.reducers.Collection opts
+
+    store = redux.createStore do
+      redux.combineReducers testmodel: reducer
+      {}
+      redux.applyMiddleware(reduxThunk.default)
+
+    actions = reduxMeta.actions.Collection opts <<< store: store
+      
+    console.log state: store.getState()
+    console.log actions: keys actions
+
+    l.log 'dispatch create action'
+    
+    store.dispatch actions.create id: 3, lala: 213
+    
+    wait 1000, -> 
+      console.log state: store.getState()
+      resolve true
+      
+
+    

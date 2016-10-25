@@ -4,7 +4,7 @@ require! {
 
   
 SimpleAction = ({ name }, data, payload) -->
-  (payload) -> { type: "resource_#{ name }" } <<< data <<< (if payload then payload: payload else {})
+  { type: "resource_#{ name }" } <<< data <<< (if payload then payload: payload else {})
 
 export Resource = (options) ->
   sa = SimpleAction options

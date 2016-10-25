@@ -8,7 +8,7 @@ export Resource = (options={}, next) ->
   (state, action) ->
     console.log "ACTION", action
     
-    if action.type not in [ '@@INIT', "resource_#{ name }" ] then return state or {}
+    if action.type not in [ '@@INIT', "resource_#{ name }" ] then return state or { state: 'empty' }
     if action.type in [ '@@INIT' ] then
       state = { state: 'empty' }
       
