@@ -3,28 +3,31 @@ require! {
   immutable: { fromJS: immutable }: i
 }
 
-export Resource = (options={}, next) ->
+
+maybeNext = (f) ->
+  (options, next) -> f options, (state, action) -> if next then next(state,action) else state
+
+export Resource = maybeNext (options={}, next) ->
   { name } = options
   (state, action) ->
-    console.log "ACTION", action
-    
-    if action.type not in [ '@@INIT', "resource_#{ name }" ] then return state or { state: 'empty' }
-    if action.type in [ '@@INIT' ] then
-      state = { state: 'empty' }
+
+    if not state then action = { verb: 'init' }
+    else if action.type isnt "resource_#{ name }" then return state
       
     switch action.verb
+      | "init" => next { state: 'empty' }, action
       | "empty" => { state: 'empty' }
       | "loading" => { state: 'loading', data: state?data }
       | "error" => { state: 'error', data: state?data, error: action.payload }
-      | _ => if next then next(state, action) else state
+      | _ => next state, action
         
-export OrderedMap = (options={}, next) ->
+export OrderedMap = maybeNext (options={}, next) ->
   Resource options, (state, action) ->
-    switch action.type
-      | "@@INIT" => state: 'empty', data: i.OrderedMap()
+    switch action.verb
+      | "init" => next { state: 'empty', data: i.OrderedMap() }, action
       | _ => if next then next(state, action) else state
       
-export TailCollection = (options={}, next) ->
+export TailCollection = maybeNext (options={}, next) ->
   { limit } = defaultsDeep options, { limit: Infinity }
   
   OrderedMap options, (state,action) ->
@@ -33,7 +36,7 @@ export TailCollection = (options={}, next) ->
         { data } = state
         { payload } = action
         { id } = payload
-        
+
         data = data.set id, immutable payload
         
         do
@@ -42,7 +45,7 @@ export TailCollection = (options={}, next) ->
           
       | _ => if next then next(state, action) else state
     
-export Collection = (options={}, next) ->
+export Collection = maybeNext (options={}, next) ->
   TailCollection options, (state, action) ->
     switch action.verb
       | 'remove' =>

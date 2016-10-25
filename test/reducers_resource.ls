@@ -9,12 +9,13 @@ require! {
   '../index.ls': { reducers }:reduxMeta
 }
 
-describe 'reducers', -> 
+describe 'reducerOutput', -> 
   describe 'meta', ->
     
     Resource = ->
       before ->
         if not @c then @c = reducers.Resource name: 'somename'
+        @state = @c void, { trigger: 'init' }
 
       specify 'loading', ->
         @state = @c @state, { type: 'resource_somename', verb: 'loading' }
@@ -41,7 +42,7 @@ describe 'reducers', ->
       Resource()
 
       specify 'init', ->
-        @state = state = @c void, { type: "@@INIT" }
+        @state = state = @c void, { whatever: "whatever" }
 
         expect state
         .to.be.an.instanceOf Object
@@ -92,8 +93,9 @@ describe 'reducers', ->
 
 
 
-describe 'storeIntegration', ->
-  specify 'create', ->
+describe 'reduxIntegration', ->
+
+  before ->
     require! {
       redux
       'redux-thunk'
@@ -105,23 +107,42 @@ describe 'storeIntegration', ->
       
     reducer = reduxMeta.reducers.Collection opts
 
-    store = redux.createStore do
+    @store = redux.createStore do
       redux.combineReducers testmodel: reducer
       {}
       redux.applyMiddleware(reduxThunk.default)
 
-    actions = reduxMeta.actions.Collection opts <<< store: store
-      
-    console.log state: store.getState()
-    console.log actions: keys actions
+    @actions = reduxMeta.actions.Collection opts <<< store: @store
+    
 
-    l.log 'dispatch create action'
+  specify 'loading', -> new p (resolve,reject) ~> 
+      
+    expect JSON.stringify(@store.getState())
+    .to.equal '{"testmodel":{"state":"empty","data":{}}}'
     
-    store.dispatch actions.create id: 3, lala: 213
+    @store.dispatch @actions.loading!
     
-    wait 1000, -> 
-      console.log state: store.getState()
-      resolve true
+    resolve expect JSON.stringify(@store.getState())
+    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+    
+  specify 'create', -> new p (resolve,reject) ~> 
+      
+    expect JSON.stringify(@store.getState())
+    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+    
+    @store.dispatch @actions.create id: 3, lala: 213
+    
+    resolve expect JSON.stringify(@store.getState())
+    .to.equal '{"testmodel":{"state":"data","data":{"3":{"id":3,"lala":213}}}}'
+
+    
+  specify 'createMore', -> new p (resolve,reject) ~> 
+      
+    @store.dispatch @actions.create id: 1, lala: 14
+    @store.dispatch @actions.create id: 2, lala: 99
+
+    resolve expect JSON.stringify @store.getState()
+    .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"2":{"id":2,"lala":99},"3":{"id":3,"lala":213}}}}'
       
 
     
