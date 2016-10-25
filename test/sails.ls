@@ -73,6 +73,13 @@ describe 'fullSailsIntegration', ->
     specify 'createMore', -> new p (resolve,reject) ~> 
       @store.dispatch @actions.remoteCreate name: 'model2', size: 141
       @store.dispatch @actions.remoteCreate name: 'model3', size: 141
+
+      expect @store.getState().testmodel.state
+      .to.equal 'loading'
+
+      expect @store.getState().testmodel.data.size
+      .to.equal 1
+    
       unsub = @store.subscribe ~>
         if @store.getState().testmodel.data.size isnt 3 then return
         unsub()
