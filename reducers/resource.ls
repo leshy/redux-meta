@@ -24,7 +24,7 @@ export Resource = maybeNext (options={}, next) ->
 export OrderedMap = maybeNext (options={}, next) ->
   Resource options, (state, action) ->
     switch action.verb
-      | "init" => next { state: 'empty', data: i.OrderedMap() }, action
+      | "init" => next { state: 'empty' }, action
       | _ => if next then next(state, action) else state
       
 export TailCollection = maybeNext (options={}, next) ->
@@ -37,6 +37,7 @@ export TailCollection = maybeNext (options={}, next) ->
         { payload } = action
         { id } = payload
 
+        if not data then data = i.OrderedMap()
         data = data.set id, immutable payload
         
         do
@@ -50,7 +51,10 @@ export Collection = maybeNext (options={}, next) ->
     switch action.verb
       | 'remove' =>
         { id } = action.payload
-        { state: 'data', data: state.data.remove id }
+        data = state.data.remove id
+        
+        if data.size then { state: 'data', data: data  }
+        else { state: 'empty' }
         
       | 'update' =>
         { data } = state

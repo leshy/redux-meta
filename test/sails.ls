@@ -2,7 +2,7 @@ require! {
   util
   assert
   chai: { expect }
-  leshdash: { keys, head, rpad, lazy, union, assign, omit, map, curry, times, keys, first, wait, head }
+  leshdash: { keys, head, rpad, lazy, union, assign, omit, map, curry, times, keys, first, wait, head, omit }
   bluebird: p
   immutable: { OrderedMap }: i
   'mocha-logger': l
@@ -55,20 +55,28 @@ describe 'fullSailsIntegration', ->
     expect JSON.stringify @store.getState()
     .to.equal '{"testmodel":{"state":"loading","data":{}}}'
 
-    unsub = @store.subscribe ~> 
-      console.log @store.getState()
+    unsub = @store.subscribe ~>
       unsub()
-      resolve true
+      @sails.models.testmodel.find().exec (err,models) ~> 
+        state = @store.getState().testmodel
+
+        expect state.state
+        .to.equal 'data'
+
+        expect JSON.stringify (state.data.get 1).filter (value,key) -> key not in <[ createdAt updatedAt ]>
+        .to.equal '{"name":"model1","size":"33","id":1}'
+        
+        resolve true
       
   specify 'remove', -> new p (resolve,reject) ~> 
     @store.dispatch @actions.remoteRemove id: 1
-    expect JSON.stringify @store.getState()
-    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
-    
+    expect @store.getState().testmodel.state
+    .to.equal 'loading'
 
     unsub = @store.subscribe ~> 
       expect JSON.stringify @store.getState()
-      .to.equal '{"testmodel":{"state":"data","data":{}}}'
+      .to.equal '{"testmodel":{"state":"empty"}}'
+      
       unsub()
       resolve true
       

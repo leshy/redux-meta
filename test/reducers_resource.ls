@@ -50,9 +50,6 @@ describe 'reducerOutput', ->
         expect state.state
         .to.equal 'empty'
 
-        expect state.data
-        .to.be.instanceOf OrderedMap
-
       specify 'create', ->
         @state = @c @state, { type: 'resource_somename', verb: 'create', payload: { id: 1, something: 'else' } }
 
@@ -118,19 +115,19 @@ describe 'reduxIntegration', ->
     specify 'loading', -> new p (resolve,reject) ~> 
 
       expect JSON.stringify(@store.getState())
-      .to.equal '{"testmodel":{"state":"empty","data":{}}}'
+      .to.equal '{"testmodel":{"state":"empty"}}'
 
       @store.dispatch @actions.loading!
 
       expect JSON.stringify(@store.getState())
-      .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+      .to.equal '{"testmodel":{"state":"loading"}}'
 
       resolve true
 
     specify 'create', -> new p (resolve,reject) ~> 
 
       expect JSON.stringify(@store.getState())
-      .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+      .to.equal '{"testmodel":{"state":"loading"}}'
 
       @store.dispatch @actions.create id: 3, lala: 213
 
