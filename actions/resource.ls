@@ -1,5 +1,5 @@
 require! {
-  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep }
+  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep }
 }
 
   
@@ -43,7 +43,13 @@ class SailsRest extends Rest
   
 export SailsCollection = (options) ->
   sa = SimpleAction options
+  
   { sub, name, io, store } = defaultsDeep options, { sub: true }
+  io.socket.on name, (event) ->
+    switch event.verb
+      | "updated" => store.dispatch actions.update payload: (event.data <<< id: event.id)
+      | "created" => store.dispatch actions.push  payload: event.data
+      | otherwise => console.error "received an unknown collection event", event
   
   actions = Collection(options) <<< do
     remoteCreate: (payload) ->
@@ -67,10 +73,5 @@ export SailsCollection = (options) ->
       .then -> each it, actions.push
       .catch -> actions.error it
         
-  io.socket.on name, (event) ->
-    switch event.verb
-      | "updated" => store.dispatch actions.update payload: (event.data <<< id: event.id)
-      | "created" => store.dispatch actions.push  payload: event.data
-      | otherwise => console.error "received an unknown collection event", event
       
       
