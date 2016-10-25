@@ -6,9 +6,10 @@ require! {
 export Resource = (options={}, next) ->
   { name } = options
   (state, action) ->
+    console.log "ACTION", action
     
-    if action.type not in [ '@@INIT', "resource_#{ name }" ] then return state
-    if action.type is '@@INIT' then
+    if action.type not in [ '@@INIT', "resource_#{ name }" ] then return state or {}
+    if action.type in [ '@@INIT' ] then
       state = { state: 'empty' }
       
     switch action.verb

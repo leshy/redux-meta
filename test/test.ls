@@ -36,10 +36,10 @@ describe 'reduxMeta', ->
       name: 'testmodel'
       io: @io
       
-    reducers = reduxMeta.reducers.Collection opts
+    reducer = reduxMeta.reducers.Collection opts
 
     store = redux.createStore do
-      reducers
+      redux.combineReducers testmodel: reducer
       {}
       redux.applyMiddleware(reduxThunk.default)
 
@@ -47,10 +47,11 @@ describe 'reduxMeta', ->
       
     console.log state: store.getState()
     console.log actions: keys actions
-    console.log reducers: reducers
 
     l.log 'dispatch create action'
+    
     store.dispatch actions.create payload: { id: 3, lala: 213 }
+    
     wait 1000, -> 
       console.log state: store.getState()
       resolve true
