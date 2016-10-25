@@ -7,6 +7,8 @@ used for big repetetive stuff like different tyoes of remote resources
 
 creates a substate named as the model, offers actions to remoteCreate remoteUpdate and remoteRemove
 
+stores data as immutable.js instances
+
 check test/sails.ls for more, but here is a quick snippet:
 
 ```livescript
