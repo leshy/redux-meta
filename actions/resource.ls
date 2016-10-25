@@ -1,6 +1,6 @@
 require! {
   moment
-  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick }
+  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick, omit }
 }
 
   
@@ -54,9 +54,9 @@ export SailsCollection = (options) ->
       |> -> data <<< it
     
 
-  checkErr = (jwRes, expectedCode=200) ->
+  checkErr = (dispatch, jwRes, expectedCode=200) ->
     if jwRes.statusCode is expectedCode then return false
-    store.dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
+    dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
     return true
   
   { sub, name, io } = defaultsDeep options, { sub: true }
@@ -70,15 +70,23 @@ export SailsCollection = (options) ->
     remoteCreate: (payload) ->
       (dispatch) -> 
         io.socket.post "/#{name}", payload, (resData, jwRes) ->
-          if checkErr jwRes, 201 then return
+          if checkErr dispatch, jwRes, 201 then return
           dispatch actions.create parseDates jwRes.body
         
         dispatch actions.loading!
-      
+
+    remoteUpdate: (payload) ->
+      (dispatch) -> 
+        io.socket.put "/#{name}/#{payload.id}", omit(payload, 'id'), (resData, jwRes) ->
+          if checkErr dispatch, jwRes then return
+          dispatch actions.update parseDates jwRes.body
+        
+        dispatch actions.loading!
+                  
     remoteRemove: ({ id }) ->
       (dispatch) -> 
         io.socket.delete "/#{name}/#{id}", (resData, jwRes) ->
-          if checkErr jwRes then return
+          if checkErr dispatch, jwRes then return
           dispatch actions.remove id: id
           
         dispatch actions.loading!

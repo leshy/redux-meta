@@ -44,12 +44,11 @@ describe 'fullSailsIntegration', ->
       {}
       redux.applyMiddleware(reduxThunk.default)
 
-    
   specify 'init', ->     
     expect JSON.stringify @store.getState()
     .to.equal '{"testmodel":{"state":"empty"}}'
 
-  specify 'create', -> new p (resolve,reject) ~> 
+  specify 'createOne', -> new p (resolve,reject) ~>
     @store.dispatch @actions.remoteCreate name: 'model1', size: 33
     
     expect JSON.stringify @store.getState()
@@ -67,14 +66,36 @@ describe 'fullSailsIntegration', ->
         expect JSON.stringify (state.data.get 1).filter (value,key) -> key not in <[ createdAt updatedAt ]>
         .to.equal '{"name":"model1","size":"33","id":1}'
         
-        resolve true
-      
+        resolve!
+
+
+  specify 'createMore', -> new p (resolve,reject) ~> 
+    @store.dispatch @actions.remoteCreate name: 'model2', size: 141
+    @store.dispatch @actions.remoteCreate name: 'model3', size: 141
+    unsub = @store.subscribe ~>
+      if @store.getState().testmodel.data.size isnt 3 then return
+      unsub()
+      resolve!
+
+                  
   specify 'remove', -> new p (resolve,reject) ~> 
     @store.dispatch @actions.remoteRemove id: 1
 
-    unsub = @store.subscribe ~> 
-      console.log  @store.getState()
+    unsub = @store.subscribe ~>
+      unsub!
+      expect @store.getState().testmodel.data.size
+      .to.equal 2
       
-      unsub()
-      resolve true
+      resolve!
+
+            
+  specify 'update', -> new p (resolve,reject) ~> 
+    @store.dispatch @actions.remoteUpdate id: 2, size: 1
+
+    unsub = @store.subscribe ~>
+      unsub!
+      expect JSON.stringify (@store.getState().testmodel.data.get 2).filter (value,key) -> key not in <[ createdAt updatedAt ]>
+      .to.equal '{"name":"model2","size":"1","id":2}'
+      
+      resolve!
       
