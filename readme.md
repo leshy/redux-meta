@@ -45,7 +45,7 @@ store = redux.createStore do
 store.dispatch testmodel1.remoteCreate name: 'model1', size: 33
 
 expect JSON.stringify @store.getState()
-.to.equal '{"testmodel":{"state":"loading"}}'
+.to.equal '{"testmodel1":{"state":"loading"},"testmodel2":{"state":"empty"}}'
 
 store.subscribe ->
   state = store.getState().testmodel1
