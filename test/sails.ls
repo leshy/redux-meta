@@ -92,10 +92,16 @@ describe 'fullSailsIntegration', ->
   specify 'update', -> new p (resolve,reject) ~> 
     @store.dispatch @actions.remoteUpdate id: 2, size: 1
 
+    expected = '{"name":"model2","size":"1","id":2}'
+    
     unsub = @store.subscribe ~>
       unsub!
       expect JSON.stringify (@store.getState().testmodel.data.get 2).filter (value,key) -> key not in <[ createdAt updatedAt ]>
-      .to.equal '{"name":"model2","size":"1","id":2}'
+      .to.equal expected
       
-      resolve!
+      @sails.models.testmodel.find({ id: 2 }).exec (err,models) ~>
+        expect JSON.stringify omit head(models), <[ createdAt updatedAt ]>
+        .to.equal expected
+
+        resolve!
       
