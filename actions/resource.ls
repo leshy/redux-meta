@@ -1,5 +1,6 @@
 require! {
-  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep }
+  moment
+  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick }
 }
 
   
@@ -40,9 +41,17 @@ class SailsRest extends Rest
   update: (name, id,data) -> new p (resolve,reject) ~> resolve true
   find: (name, filter) -> new p (resolve,reject) ~> resolve true
   findOne: (name, filter) -> new p (resolve,reject) ~> resolve true
-  
+
+
+      
 export SailsCollection = (options) ->
   sa = SimpleAction options
+  parseDates = (data) ->
+    data
+      |> -> it{ createdAt, updatedAt }
+      |> mapValues _, (-> moment it)
+      |> -> data <<< it
+    
   
   { sub, name, io, store } = defaultsDeep options, { sub: true }
   io.socket.on name, (event) ->
@@ -53,13 +62,14 @@ export SailsCollection = (options) ->
   
   actions = Collection(options) <<< do
     remoteCreate: (payload) ->
+      io.socket.post "/#{name}", payload, (resData, jwRes) ->
+        if jwRes.statusCode isnt 201 then store.dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
+        else store.dispatch actions.create parseDates jwRes.body
       actions.loading!
-      io.socket.post "/#{name}", payload
-      .then -> actions.push it
-      .catch -> actions.error it
       
     remoteRemove: ({ id }) ->
       actions.loading!
+      
       io.socket.delete "/#{name}/#{id}"
       .then -> actions.remove id: id
       .catch -> actions.error it

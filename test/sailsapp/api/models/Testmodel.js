@@ -11,7 +11,7 @@ module.exports = {
 
     name : { type: 'string' },
 
-    size : { type: 'number' }
+    size : { type: 'string' }
   }
 };
 

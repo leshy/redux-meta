@@ -113,59 +113,58 @@ describe 'reduxIntegration', ->
       redux.applyMiddleware(reduxThunk.default)
 
     @actions = reduxMeta.actions.Collection opts <<< store: @store
-    
 
-  specify 'loading', -> new p (resolve,reject) ~> 
-      
-    expect JSON.stringify(@store.getState())
-    .to.equal '{"testmodel":{"state":"empty","data":{}}}'
-    
-    @store.dispatch @actions.loading!
-    
-    expect JSON.stringify(@store.getState())
-    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+  describe 'Collection', -> 
+    specify 'loading', -> new p (resolve,reject) ~> 
 
-    resolve true
-    
-  specify 'create', -> new p (resolve,reject) ~> 
-      
-    expect JSON.stringify(@store.getState())
-    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
-    
-    @store.dispatch @actions.create id: 3, lala: 213
-    
-    expect JSON.stringify(@store.getState())
-    .to.equal '{"testmodel":{"state":"data","data":{"3":{"id":3,"lala":213}}}}'
+      expect JSON.stringify(@store.getState())
+      .to.equal '{"testmodel":{"state":"empty","data":{}}}'
 
-    resolve true
-    
-  specify 'createMore', -> new p (resolve,reject) ~> 
-      
-    @store.dispatch @actions.create id: 1, lala: 14
-    @store.dispatch @actions.create id: 2, lala: 99
+      @store.dispatch @actions.loading!
 
-    expect JSON.stringify @store.getState()
-    .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"2":{"id":2,"lala":99},"3":{"id":3,"lala":213}}}}'
-    resolve true
-      
+      expect JSON.stringify(@store.getState())
+      .to.equal '{"testmodel":{"state":"loading","data":{}}}'
 
-  specify 'remove', -> new p (resolve,reject) ~> 
-      
-    @store.dispatch @actions.remove id: 2
+      resolve true
 
-    expect JSON.stringify @store.getState()
-    .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"3":{"id":3,"lala":213}}}}'
+    specify 'create', -> new p (resolve,reject) ~> 
 
-    resolve true
+      expect JSON.stringify(@store.getState())
+      .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+
+      @store.dispatch @actions.create id: 3, lala: 213
+
+      expect JSON.stringify(@store.getState())
+      .to.equal '{"testmodel":{"state":"data","data":{"3":{"id":3,"lala":213}}}}'
+
+      resolve true
+
+    specify 'createMore', -> new p (resolve,reject) ~> 
+
+      @store.dispatch @actions.create id: 1, lala: 14
+      @store.dispatch @actions.create id: 2, lala: 99
+
+      expect JSON.stringify @store.getState()
+      .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"2":{"id":2,"lala":99},"3":{"id":3,"lala":213}}}}'
+      resolve true
 
 
-  specify 'update', -> new p (resolve,reject) ~> 
-      
-    @store.dispatch @actions.update id: 1, newattr: 'hello'
-    @store.dispatch @actions.update id: 3, lala: 1
+    specify 'remove', -> new p (resolve,reject) ~> 
 
-    expect JSON.stringify @store.getState()
-    .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14,"newattr":"hello"},"3":{"id":3,"lala":1}}}}'
+      @store.dispatch @actions.remove id: 2
+
+      expect JSON.stringify @store.getState()
+      .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"3":{"id":3,"lala":213}}}}'
+
+      resolve true
 
 
-    resolve true
+    specify 'update', -> new p (resolve,reject) ~> 
+
+      @store.dispatch @actions.update id: 1, newattr: 'hello'
+      @store.dispatch @actions.update id: 3, lala: 1
+
+      expect JSON.stringify @store.getState()
+      .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14,"newattr":"hello"},"3":{"id":3,"lala":1}}}}'
+
+      resolve true

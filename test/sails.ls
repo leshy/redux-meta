@@ -10,12 +10,13 @@ require! {
 
 require! { '../index.ls': { define }: reduxMeta }
 
-describe 'reduxMeta', ->
+describe 'fullSailsIntegration', ->
   before -> new p (resolve,reject) ~>
     l.log 'starting sails'
     sails = require './sailsapp/node_modules/sails'
+    process.chdir './test/sailsapp'
     
-    sails.lift { port: 31313, hooks: { grunt: false }, log: { level: 'silent' } },  (err,sails) ~>
+    sails.lift { port: 31313, hooks: { grunt: false }, log: { level: 'verbose' } },  (err,sails) ~>
       if err then reject err else resolve @sails = sails
 
   before -> new p (resolve,reject) ~> 
@@ -25,8 +26,7 @@ describe 'reduxMeta', ->
     io.sails.url = 'http://localhost:31313'
     io.socket.on 'connect', resolve
 
-
-  specify 'init', -> new p (resolve,reject) ~> 
+  before ->
     require! {
       redux
       'redux-thunk'
@@ -38,21 +38,20 @@ describe 'reduxMeta', ->
       
     reducer = reduxMeta.reducers.Collection opts
 
-    store = redux.createStore do
+    @store = redux.createStore do
       redux.combineReducers testmodel: reducer
       {}
       redux.applyMiddleware(reduxThunk.default)
 
-    actions = reduxMeta.actions.Collection opts <<< store: store
-      
-    console.log state: store.getState()
-    console.log actions: keys actions
-
+    @actions = reduxMeta.actions.SailsCollection opts <<< store: @store
+  specify 'init', -> new p (resolve,reject) ~> 
     l.log 'dispatch create action'
     
-    store.dispatch actions.create id: 3, lala: 213
-    
-    wait 1000, -> 
-      console.log state: store.getState()
+    @store.dispatch @actions.remoteCreate name: 'model1', size: 33
+    console.log state: @store.getState()
+    wait 1000, ~> 
+      console.log "DONE"
+      console.log state: @store.getState()
+      
       resolve true
       
