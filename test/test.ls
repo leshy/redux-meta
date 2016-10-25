@@ -21,21 +21,33 @@ describe 'reduxMeta', ->
   before -> new p (resolve,reject) ~> 
     l.log 'connecting websocket'
     io = @io = require('./sailsapp/node_modules/sails.io.js')( require('./sailsapp/node_modules/socket.io-client') )
+    io.sails.transports=<[ websocket ]>
     io.sails.url = 'http://localhost:31313'
-    resolve!
+    io.socket.on 'connect', resolve
 
 
-  before -> new p (resolve,reject) ~>
-    l.log 'initializing redux'
-    resolve true
-
-
-  specify 'init', ->
-    { actions, reducers } = reduxMeta.define reduxMeta.reducers.Collection, reduxMeta.actions.SailsCollection, do
+  specify 'init', -> new p (resolve,reject) ~> 
+    require! {
+      redux
+      'redux-thunk'
+    }
+    
+    { actions, reducers } = reduxMeta.define reduxMeta.reducers.Collection, reduxMeta.actions.Collection, do
       name: 'testmodel'
       io: @io
+
+    store = redux.createStore do
+      reducers
+      {}
+      redux.applyMiddleware(reduxThunk.default)
+
+      
+    console.log state: store.getState()
 
     console.log actions: keys actions
     console.log reducers: reducers
 
-    
+    store.dispatch actions.create payload: { id: 3, lala: 213 }
+    wait 1000, -> 
+      console.log state: store.getState()
+      resolve true

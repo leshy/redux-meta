@@ -22,6 +22,8 @@
     "chai": "^3.5.0",
     "livescript": "^1.5.0",
     "mocha": "^3.1.2",
-    "mocha-logger": "^1.0.4"
+    "mocha-logger": "^1.0.4",
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.1.0"
   }
 }
