@@ -5,11 +5,9 @@ used for big repetetive stuff like different tyoes of remote resources
 
 ## sails blueprint api actions and reducers
 
-creates a substate named as the model
-offers actions to remoteCreate remoteUpdate and remoteRemove
+creates a substate named as the model, offers actions to remoteCreate remoteUpdate and remoteRemove
 
-check test/sails.ls for more,
-quick snippet:
+check test/sails.ls for more, but here is a quick snippet:
 
 ```livescript
 require! {
@@ -18,11 +16,19 @@ require! {
 }
 io = require('sails.io.js')( require('socket.io-client')
 
+# will return
+# { 
+#  actions: { update, create, remoteUpdate, remoteCreate etc... } 
+#  reducers: testmodel1: [ Function ]
+# }
+#
+# you'll probably want to use remote actions only, they trigger local ones once the data changes on the serverside
+
 testmodel1 = reduxMeta.define do
   reduxMeta.reducers.Collection # defines which reducer to use (what kind of data do we expect)
   reduxMeta.actions.SailsCollection # defines concrete async actions on this collection (actual websocket interface to sails)
-  name: 'testmodel1'
-  io: io
+  name: 'testmodel1' # makes this concrete by specifying which model we work on
+  io: io # and which connection
 
 
 testmodel2 = reduxMeta.define do
