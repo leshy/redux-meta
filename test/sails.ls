@@ -47,13 +47,13 @@ describe 'fullSailsIntegration', ->
     
   specify 'init', ->     
     expect JSON.stringify @store.getState()
-    .to.equal '{"testmodel":{"state":"empty","data":{}}}'
+    .to.equal '{"testmodel":{"state":"empty"}}'
 
   specify 'create', -> new p (resolve,reject) ~> 
     @store.dispatch @actions.remoteCreate name: 'model1', size: 33
     
     expect JSON.stringify @store.getState()
-    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+    .to.equal '{"testmodel":{"state":"loading"}}'
 
     unsub = @store.subscribe ~>
       unsub()
