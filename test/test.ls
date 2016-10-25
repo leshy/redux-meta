@@ -31,23 +31,27 @@ describe 'reduxMeta', ->
       redux
       'redux-thunk'
     }
-    
-    { actions, reducers } = reduxMeta.define reduxMeta.reducers.Collection, reduxMeta.actions.Collection, do
+
+    opts = do
       name: 'testmodel'
       io: @io
+      
+    reducers = reduxMeta.reducers.Collection opts
 
     store = redux.createStore do
       reducers
       {}
       redux.applyMiddleware(reduxThunk.default)
 
+    actions = reduxMeta.actions.Collection opts <<< store: store
       
     console.log state: store.getState()
-
     console.log actions: keys actions
     console.log reducers: reducers
 
+    l.log 'dispatch create action'
     store.dispatch actions.create payload: { id: 3, lala: 213 }
     wait 1000, -> 
       console.log state: store.getState()
       resolve true
+      
