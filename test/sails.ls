@@ -111,3 +111,8 @@ describe 'fullSailsIntegration', ->
 
           resolve!
 
+    specify 'get', -> new p (resolve,reject) ~> 
+      resolve!
+      l.pending 'get todo'
+
+
