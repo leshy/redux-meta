@@ -8,5 +8,5 @@ export reducers = require './reducers'
 export define = (metaReducer, metaAction, options) ->
   do
     actions: metaAction options
-    reducers: metaReducer options
+    reducer: metaReducer options
 

@@ -59,7 +59,7 @@ export SailsCollection = (options) ->
     store.dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
     return true
   
-  { sub, name, io, store } = defaultsDeep options, { sub: true }
+  { sub, name, io } = defaultsDeep options, { sub: true }
   io.socket.on name, (event) ->
     switch event.verb
       | "updated" => store.dispatch actions.update payload: (event.data <<< id: event.id)
@@ -68,18 +68,20 @@ export SailsCollection = (options) ->
   
   actions = Collection(options) <<< do
     remoteCreate: (payload) ->
-      io.socket.post "/#{name}", payload, (resData, jwRes) ->
-        if checkErr jwRes, 201 then return
-        store.dispatch actions.create parseDates jwRes.body
+      (dispatch) -> 
+        io.socket.post "/#{name}", payload, (resData, jwRes) ->
+          if checkErr jwRes, 201 then return
+          dispatch actions.create parseDates jwRes.body
         
-      actions.loading!
+        dispatch actions.loading!
       
     remoteRemove: ({ id }) ->
-      io.socket.delete "/#{name}/#{id}", (resData, jwRes) ->
-        if checkErr jwRes then return
-        store.dispatch actions.remove id: id
+      (dispatch) -> 
+        io.socket.delete "/#{name}/#{id}", (resData, jwRes) ->
+          if checkErr jwRes then return
+          dispatch actions.remove id: id
           
-      actions.loading!
+        dispatch actions.loading!
       
     remoteGet: (filter) ->
       query = "/#{name}?sort=createdAt DESC"
