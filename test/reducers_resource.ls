@@ -122,8 +122,10 @@ describe 'reduxIntegration', ->
     
     @store.dispatch @actions.loading!
     
-    resolve expect JSON.stringify(@store.getState())
+    expect JSON.stringify(@store.getState())
     .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+
+    resolve true
     
   specify 'create', -> new p (resolve,reject) ~> 
       
@@ -132,17 +134,38 @@ describe 'reduxIntegration', ->
     
     @store.dispatch @actions.create id: 3, lala: 213
     
-    resolve expect JSON.stringify(@store.getState())
+    expect JSON.stringify(@store.getState())
     .to.equal '{"testmodel":{"state":"data","data":{"3":{"id":3,"lala":213}}}}'
 
+    resolve true
     
   specify 'createMore', -> new p (resolve,reject) ~> 
       
     @store.dispatch @actions.create id: 1, lala: 14
     @store.dispatch @actions.create id: 2, lala: 99
 
-    resolve expect JSON.stringify @store.getState()
+    expect JSON.stringify @store.getState()
     .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"2":{"id":2,"lala":99},"3":{"id":3,"lala":213}}}}'
+    resolve true
       
 
-    
+  specify 'remove', -> new p (resolve,reject) ~> 
+      
+    @store.dispatch @actions.remove id: 2
+
+    expect JSON.stringify @store.getState()
+    .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14},"3":{"id":3,"lala":213}}}}'
+
+    resolve true
+
+
+  specify 'update', -> new p (resolve,reject) ~> 
+      
+    @store.dispatch @actions.update id: 1, newattr: 'hello'
+    @store.dispatch @actions.update id: 3, lala: 1
+
+    expect JSON.stringify @store.getState()
+    .to.equal '{"testmodel":{"state":"data","data":{"1":{"id":1,"lala":14,"newattr":"hello"},"3":{"id":3,"lala":1}}}}'
+
+
+    resolve true
