@@ -3,7 +3,7 @@
 helpers for automatic construction of state reducers and actions
 used for big repetetive stuff like different tyoes of remote resources
 
-# sails blueprint api actions and reducers
+## sails blueprint api actions and reducers
 
 creates a substate named as the model
 offers actions to remoteCreate remoteUpdate and remoteRemove
@@ -19,8 +19,8 @@ require! {
 io = require('sails.io.js')( require('socket.io-client')
 
 testmodel1 = reduxMeta.define do
-  reduxMeta.reducers.Collection
-  reduxMeta.actions.SailsCollection
+  reduxMeta.reducers.Collection # defines which reducer to use (what kind of data do we expect)
+  reduxMeta.actions.SailsCollection # defines concrete async actions on this collection (actual websocket interface to sails)
   name: 'testmodel1'
   io: io
 
