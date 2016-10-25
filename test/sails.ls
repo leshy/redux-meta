@@ -46,14 +46,14 @@ describe 'fullSailsIntegration', ->
         redux.applyMiddleware(reduxThunk.default)
 
     specify 'init', ->     
-      expect JSON.stringify @store.getState()
-      .to.equal '{"testmodel":{"state":"empty"}}'
+      expect @store.getState()
+      .to.deep.equal {"testmodel":{"state":"empty"}}
 
     specify 'createOne', -> new p (resolve,reject) ~>
       @store.dispatch @actions.remoteCreate name: 'model1', size: 33
 
-      expect JSON.stringify @store.getState()
-      .to.equal '{"testmodel":{"state":"loading"}}'
+      expect @store.getState()
+      .to.deep.equal {"testmodel":{"state":"loading"}}
 
       unsub = @store.subscribe ~>
         unsub()

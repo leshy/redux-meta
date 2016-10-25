@@ -114,20 +114,20 @@ describe 'reduxIntegration', ->
   describe 'Collection', -> 
     specify 'loading', -> new p (resolve,reject) ~> 
 
-      expect JSON.stringify(@store.getState())
-      .to.equal '{"testmodel":{"state":"empty"}}'
+      expect @store.getState()
+      .to.deep.equal {"testmodel":{"state":"empty"}}
 
       @store.dispatch @actions.loading!
 
-      expect JSON.stringify(@store.getState())
-      .to.equal '{"testmodel":{"state":"loading"}}'
+      expect @store.getState()
+      .to.deep.equal {"testmodel":{"state":"loading"}}
 
       resolve true
 
     specify 'create', -> new p (resolve,reject) ~> 
 
-      expect JSON.stringify(@store.getState())
-      .to.equal '{"testmodel":{"state":"loading"}}'
+      expect @store.getState()
+      .to.deep.equal {"testmodel":{"state":"loading"}}
 
       @store.dispatch @actions.create id: 3, lala: 213
 

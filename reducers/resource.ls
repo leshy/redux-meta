@@ -17,7 +17,7 @@ export Resource = maybeNext (options={}, next) ->
     switch action.verb
       | "init" => next { state: 'empty' }, action
       | "empty" => { state: 'empty' }
-      | "loading" => { state: 'loading', data: state?data }
+      | "loading" => { state: 'loading' } <<< (if state.data then data: state.data)
       | "error" => { state: 'error', data: state?data, error: action.payload }
       | _ => next state, action
         
