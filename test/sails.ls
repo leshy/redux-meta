@@ -16,7 +16,7 @@ describe 'fullSailsIntegration', ->
     sails = require './sailsapp/node_modules/sails'
     process.chdir './test/sailsapp'
     
-    sails.lift { port: 31313, hooks: { grunt: false }, log: { level: 'verbose' } },  (err,sails) ~>
+    sails.lift { port: 31313, hooks: { grunt: false }, log: { level: 'silent' } },  (err,sails) ~>
       if err then reject err else resolve @sails = sails
 
   before -> new p (resolve,reject) ~> 
@@ -44,14 +44,31 @@ describe 'fullSailsIntegration', ->
       redux.applyMiddleware(reduxThunk.default)
 
     @actions = reduxMeta.actions.SailsCollection opts <<< store: @store
-  specify 'init', -> new p (resolve,reject) ~> 
-    l.log 'dispatch create action'
     
+  specify 'init', ->     
+    expect JSON.stringify @store.getState()
+    .to.equal '{"testmodel":{"state":"empty","data":{}}}'
+
+  specify 'create', -> new p (resolve,reject) ~> 
     @store.dispatch @actions.remoteCreate name: 'model1', size: 33
-    console.log state: @store.getState()
-    wait 1000, ~> 
-      console.log "DONE"
-      console.log state: @store.getState()
+    
+    expect JSON.stringify @store.getState()
+    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+
+    unsub = @store.subscribe ~> 
+      console.log @store.getState()
+      unsub()
+      resolve true
       
+  specify 'remove', -> new p (resolve,reject) ~> 
+    @store.dispatch @actions.remoteRemove id: 1
+    expect JSON.stringify @store.getState()
+    .to.equal '{"testmodel":{"state":"loading","data":{}}}'
+    
+
+    unsub = @store.subscribe ~> 
+      expect JSON.stringify @store.getState()
+      .to.equal '{"testmodel":{"state":"data","data":{}}}'
+      unsub()
       resolve true
       

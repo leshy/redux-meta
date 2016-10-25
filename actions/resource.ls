@@ -46,12 +46,18 @@ class SailsRest extends Rest
       
 export SailsCollection = (options) ->
   sa = SimpleAction options
+  
   parseDates = (data) ->
     data
       |> -> it{ createdAt, updatedAt }
       |> mapValues _, (-> moment it)
       |> -> data <<< it
     
+
+  checkErr = (jwRes, expectedCode=200) ->
+    if jwRes.statusCode is expectedCode then return false
+    store.dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
+    return true
   
   { sub, name, io, store } = defaultsDeep options, { sub: true }
   io.socket.on name, (event) ->
@@ -63,16 +69,17 @@ export SailsCollection = (options) ->
   actions = Collection(options) <<< do
     remoteCreate: (payload) ->
       io.socket.post "/#{name}", payload, (resData, jwRes) ->
-        if jwRes.statusCode isnt 201 then store.dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
-        else store.dispatch actions.create parseDates jwRes.body
+        if checkErr jwRes, 201 then return
+        store.dispatch actions.create parseDates jwRes.body
+        
       actions.loading!
       
     remoteRemove: ({ id }) ->
+      io.socket.delete "/#{name}/#{id}", (resData, jwRes) ->
+        if checkErr jwRes then return
+        store.dispatch actions.remove id: id
+          
       actions.loading!
-      
-      io.socket.delete "/#{name}/#{id}"
-      .then -> actions.remove id: id
-      .catch -> actions.error it
       
     remoteGet: (filter) ->
       query = "/#{name}?sort=createdAt DESC"
