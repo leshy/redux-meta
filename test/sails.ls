@@ -6,25 +6,31 @@ require! {
   bluebird: p
   immutable: { OrderedMap }: i
   'mocha-logger': l
+  randomlisten
 }
 
 require! { '../index.ls': { define }: reduxMeta }
 
 describe 'fullSailsIntegration', ->
   describe 'SailsCollection', -> 
-    before -> new p (resolve,reject) ~>
-      l.log 'starting sails'
+    before ->  new p (resolve,reject) ~>
+      l.log "starting test sails instance"
       sails = require './sailsapp/node_modules/sails'
       process.chdir './test/sailsapp'
 
-      sails.lift { port: 31313, hooks: { grunt: false }, log: { level: 'silent' } },  (err,sails) ~>
-        if err then reject err else resolve @sails = sails
+      randomlisten (err, @port ) ~> 
 
-    before -> new p (resolve,reject) ~> 
+        if err then return reject err
+        l.log "using port #{ @port }"
+
+        sails.lift { port: @port, hooks: { grunt: false }, log: { level: 'silent' } },  (err,sails) ~>
+          if err then reject err else resolve @sails = sails
+
+    before -> new p (resolve,reject) ~>
       l.log 'connecting websocket'
       io = @io = require('./sailsapp/node_modules/sails.io.js')( require('./sailsapp/node_modules/socket.io-client') )
       io.sails.transports=<[ websocket ]>
-      io.sails.url = 'http://localhost:31313'
+      io.sails.url = "http://localhost:#{ @port }"
       io.socket.on 'connect', resolve
 
     before ->
@@ -113,6 +119,6 @@ describe 'fullSailsIntegration', ->
 
     specify 'get', -> new p (resolve,reject) ~> 
       resolve!
-      l.pending 'get todo'
+      l.error 'todo: get'
 
 
