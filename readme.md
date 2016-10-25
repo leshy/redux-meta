@@ -50,11 +50,20 @@ expect JSON.stringify @store.getState()
 .to.equal '{"testmodel1":{"state":"loading"},"testmodel2":{"state":"empty"}}'
 
 store.subscribe ->
+  # after create my store looks something like:
+  # (store testmodel1 data attribute is an immutable.js OrderedMap
+  # actual model data under the key is immutable.js Map
+  #
+  # {
+  #   testmodel1: { state: 'data', 
+  #                 data: { 1: { name: 'model1', id: 1, size: 33 } }},
+  #   testmodel2: { state: 'empty'}
+  #  } 
   state = store.getState().testmodel1
 
   expect state.state
   .to.equal 'data'
-
+  
   expect JSON.stringify (state.data.get 1).filter (value,key) -> key not in <[ createdAt updatedAt ]>
   .to.equal '{"name":"model1","size":"33","id":1}'
 
