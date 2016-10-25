@@ -3,9 +3,9 @@
 helpers for automatic construction of state reducers and actions
 used for big repetetive stuff like different tyoes of remote resources
 
-## sails blueprint api actions and reducers
+## sails.js blueprint api actions and reducers
 
-creates a substate named as the model, offers actions to remoteCreate remoteUpdate and remoteRemove
+creates a substate named as the model, offers actions to remoteCreate remoteUpdate and remoteRemove, automatically subscribes to remote changes via sails blueprint api
 
 stores data as immutable.js instances
 
