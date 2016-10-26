@@ -5,7 +5,9 @@ require! {
   leshdash: { keys, head, rpad, lazy, union, assign, omit, map, curry, times, keys, first, wait, head, omit }
   bluebird: p
   immutable: { OrderedMap }: i
+  
   'mocha-logger': l
+  
   randomlisten
 }
 

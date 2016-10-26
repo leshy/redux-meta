@@ -3,7 +3,6 @@ require! {
   leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick, omit }
 }
 
-  
 SimpleAction = ({ name }, data, payload) -->
   { type: "resource_#{ name }" } <<< data <<< (if payload then payload: payload else {})
 
@@ -26,34 +25,19 @@ export Collection = (options) ->
     remove: sa verb: 'remove'
     replace: sa verb: 'replace'
     update: sa verb: 'update'
-
-class Rest
-  remove: (name, id) -> new p (resolve,reject) ~> resolve true
-  create: (name, id) -> new p (resolve,reject) ~> resolve true
-  update: (name, id,data) -> new p (resolve,reject) ~> resolve true
-  find: (name, filter) -> new p (resolve,reject) ~> resolve true
-  findOne: (name, filter) -> new p (resolve,reject) ~> resolve true
-
-class SailsRest extends Rest
-  ({ @io }) -> true
-  remove: (name, id) -> @io.socket.delete 
-  create: (name, id) -> new p (resolve,reject) ~> resolve true
-  update: (name, id,data) -> new p (resolve,reject) ~> resolve true
-  find: (name, filter) -> new p (resolve,reject) ~> resolve true
-  findOne: (name, filter) -> new p (resolve,reject) ~> resolve true
-
-
       
 export SailsCollection = (options) ->
   sa = SimpleAction options
-  
+
+  # we convert createdAt and updatedAt into moment instances  
   parseDates = (data) ->
     data
       |> -> it{ createdAt, updatedAt }
       |> mapValues _, (-> moment it)
       |> -> data <<< it
-    
 
+  # used by all the endpoints making API calls
+  # checks if we got an error response and dispatches an error action if needed
   checkErr = (dispatch, jwRes, expectedCode=200) ->
     if jwRes.statusCode is expectedCode then return false
     dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
@@ -69,37 +53,36 @@ export SailsCollection = (options) ->
   actions = Collection(options) <<< do
     remoteCreate: (payload) ->
       (dispatch) -> 
+        dispatch actions.loading!
+        
         io.socket.post "/#{name}", payload, (resData, jwRes) ->
           if checkErr dispatch, jwRes, 201 then return
           dispatch actions.create parseDates jwRes.body
-        
-        dispatch actions.loading!
 
     remoteUpdate: (payload) ->
       (dispatch) -> 
+        dispatch actions.loading!
+        
         io.socket.put "/#{name}/#{payload.id}", omit(payload, 'id'), (resData, jwRes) ->
           if checkErr dispatch, jwRes then return
           dispatch actions.update parseDates jwRes.body
-        
-        dispatch actions.loading!
                   
     remoteRemove: ({ id }) ->
-      (dispatch) -> 
+      (dispatch) ->
+        dispatch actions.loading!
+        
         io.socket.delete "/#{name}/#{id}", (resData, jwRes) ->
           if checkErr dispatch, jwRes then return
           dispatch actions.remove id: id
           
-        dispatch actions.loading!
-      
     get: (filter) ->
       (dispatch) -> 
+        dispatch actions.loading!
+        
         query = "/#{name}?sort=createdAt DESC"
         if filter then query = "#{query}&where=#{JSON.stringify(filter)}"
-
-        dispatch actions.loading!
 
         io.socket.get query, (resData, jwRes) ->
           if checkErr dispatch, jwRes then return
           dispatch actions.replace map jwRes.body, parseDates
-
 
