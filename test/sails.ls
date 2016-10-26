@@ -33,7 +33,9 @@ describe 'fullSailsIntegration', ->
       io = @io = require('./sailsapp/node_modules/sails.io.js')( require('./sailsapp/node_modules/socket.io-client') )
       io.sails.transports=<[ websocket ]>
       io.sails.url = "http://localhost:#{ @port }"
-      io.socket.on 'connect', resolve
+      io.socket.on 'connect', ->
+        l.success 'sails ready for testing'
+        resolve!
 
     before ->
       require! {
@@ -53,11 +55,11 @@ describe 'fullSailsIntegration', ->
         {}
         redux.applyMiddleware(reduxThunk.default)
 
-    specify 'init', ->     
+    specify 'init store', ->     
       expect @store.getState()
       .to.deep.equal {"testmodel":{"state":"empty"}}
 
-    specify 'createOne', -> new p (resolve,reject) ~>
+    specify 'remoteCreate one', -> new p (resolve,reject) ~>
       @store.dispatch @actions.remoteCreate name: 'model1', size: 33
 
       expect @store.getState()
@@ -78,7 +80,7 @@ describe 'fullSailsIntegration', ->
           resolve!
 
 
-    specify 'createMore', -> new p (resolve,reject) ~> 
+    specify 'remoteCreate multi', -> new p (resolve,reject) ~> 
       @store.dispatch @actions.remoteCreate name: 'model2', size: 141
       @store.dispatch @actions.remoteCreate name: 'model3', size: 13
 
@@ -93,7 +95,7 @@ describe 'fullSailsIntegration', ->
         unsub()
         resolve!
 
-    specify 'remove', -> new p (resolve,reject) ~> 
+    specify 'remoteRemove', -> new p (resolve,reject) ~> 
       @store.dispatch @actions.remoteRemove id: 1
 
       unsub = @store.subscribe ~>
@@ -103,7 +105,7 @@ describe 'fullSailsIntegration', ->
 
         resolve!
 
-    specify 'update', -> new p (resolve,reject) ~> 
+    specify 'remoteUpdate', -> new p (resolve,reject) ~> 
       @store.dispatch @actions.remoteUpdate id: 2, size: 1
 
       expected = '{"name":"model2","size":"1","id":2}'
