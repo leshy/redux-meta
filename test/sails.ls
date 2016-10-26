@@ -1,4 +1,5 @@
 require! {
+  path
   util
   assert
   chai: { expect }
@@ -17,8 +18,8 @@ describe 'fullSailsIntegration', ->
   describe 'SailsCollection', -> 
     before ->  new p (resolve,reject) ~>
       l.log "starting test sails instance"
-      sails = require './sailsapp/node_modules/sails'
-      process.chdir './test/sailsapp'
+      process.chdir @dir = path.resolve __dirname, '../sailsTestApp'
+      sails = require "#{@dir}/node_modules/sails"
 
       randomlisten (err, @port ) ~> 
 
@@ -30,7 +31,7 @@ describe 'fullSailsIntegration', ->
 
     before -> new p (resolve,reject) ~>
       l.log 'connecting websocket'
-      io = @io = require('./sailsapp/node_modules/sails.io.js')( require('./sailsapp/node_modules/socket.io-client') )
+      io = @io = require("#{@dir}/node_modules/sails.io.js")( require("#{@dir}/node_modules/socket.io-client") )
       io.sails.transports=<[ websocket ]>
       io.sails.url = "http://localhost:#{ @port }"
       io.socket.on 'connect', ->
