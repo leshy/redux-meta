@@ -24,6 +24,7 @@ export Collection = (options) ->
   
   TailCollection(options) <<< do
     remove: sa verb: 'remove'
+    replace: sa verb: 'replace'
     update: sa verb: 'update'
 
 class Rest
@@ -90,14 +91,15 @@ export SailsCollection = (options) ->
           
         dispatch actions.loading!
       
-    remoteGet: (filter) ->
-      query = "/#{name}?sort=createdAt DESC"
-      if filter then query = "#{query}&where=JSON.stringify(filter)"
-        
-      actions.loading!
-      io.socket.get query
-      .then -> each it, actions.push
-      .catch -> actions.error it
-        
-      
-      
+    get: (filter) ->
+      (dispatch) -> 
+        query = "/#{name}?sort=createdAt DESC"
+        if filter then query = "#{query}&where=#{JSON.stringify(filter)}"
+
+        dispatch actions.loading!
+
+        io.socket.get query, (resData, jwRes) ->
+          if checkErr dispatch, jwRes then return
+          dispatch actions.replace map jwRes.body, parseDates
+
+

@@ -78,7 +78,7 @@ describe 'fullSailsIntegration', ->
 
     specify 'createMore', -> new p (resolve,reject) ~> 
       @store.dispatch @actions.remoteCreate name: 'model2', size: 141
-      @store.dispatch @actions.remoteCreate name: 'model3', size: 141
+      @store.dispatch @actions.remoteCreate name: 'model3', size: 13
 
       expect @store.getState().testmodel.state
       .to.equal 'loading'
@@ -117,8 +117,18 @@ describe 'fullSailsIntegration', ->
 
           resolve!
 
-    specify 'get', -> new p (resolve,reject) ~> 
-      resolve!
-      l.error 'todo: get'
-
+    specify 'get', -> new p (resolve,reject) ~>
+      @store.dispatch @actions.get size: 1
+      unsub = @store.subscribe ~>
+        unsub!
+        
+        state = @store.getState().testmodel
+        
+        expect state.data.size
+        .to.equal 1
+        
+        expect JSON.stringify (state.data.get 2).filter (value,key) -> key not in <[ createdAt updatedAt ]>
+        .to.equal '{"name":"model2","size":"1","id":2}'
+        
+        resolve!
 

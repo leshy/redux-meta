@@ -1,5 +1,5 @@
 require! {
-  leshdash: { defaultsDeep }
+  leshdash: { defaultsDeep, map, mapValues, each, reduce }
   immutable: { fromJS: immutable }: i
 }
 
@@ -55,7 +55,20 @@ export Collection = maybeNext (options={}, next) ->
         
         if data.size then { state: 'data', data: data  }
         else { state: 'empty' }
-        
+
+      | 'replace' =>
+        if action.payload.length is 0 then { state: 'empty' }
+        else
+
+          data = reduce do
+            action.payload
+            (data, {id}:model) -> data.set id, immutable model
+            i.OrderedMap()
+
+          do
+            state: 'data'
+            data: data
+                
       | 'update' =>
         { data } = state
         { payload } = action
