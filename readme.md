@@ -51,14 +51,16 @@ expect @store.getState()
 
 store.subscribe ->
   # after create my store looks something like:
-  # (store testmodel1 data attribute is an immutable.js OrderedMap
-  # actual model data under the key is immutable.js Map
   #
   # {
   #   testmodel1: { state: 'data', 
   #                 data: { 1: { name: 'model1', id: 1, size: 33 } }},
   #   testmodel2: { state: 'empty'}
   #  } 
+  #
+  # (store testmodel1 data attribute is an immutable.js OrderedMap
+  # actual model data under the key is immutable.js Map
+  
   state = store.getState().testmodel1
 
   expect state.state

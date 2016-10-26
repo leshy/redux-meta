@@ -1,8 +1,8 @@
 require! {
   leshdash: { defaultsDeep, map, mapValues, each, reduce }
   immutable: { fromJS: immutable }: i
-}
 
+}
 
 maybeNext = (f) ->
   (options, next) -> f options, (state, action) -> if next then next(state,action) else state

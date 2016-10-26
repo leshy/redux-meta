@@ -24,7 +24,7 @@ describe 'fullSailsIntegration', ->
       randomlisten (err, @port ) ~> 
 
         if err then return reject err
-        l.log "will use port #{ @port }"
+        l.log "sails will use port #{ @port }"
 
         sails.lift { port: @port, hooks: { grunt: false }, log: { level: 'silent' } },  (err,sails) ~>
           if err then reject err else resolve @sails = sails
