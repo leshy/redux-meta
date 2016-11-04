@@ -1,6 +1,8 @@
+#autocompile
 require! {
   moment
   leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick, omit }
+  path
 }
 
 SimpleAction = ({ name }, data, payload) -->
@@ -43,7 +45,8 @@ export SailsCollection = (options) ->
     dispatch actions.error (statusCode: jwRes.statusCode) <<< jwRes.error
     return true
   
-  { sub, name, io } = defaultsDeep options, { sub: true }
+  { sub, name, io, pathPrefix } = defaultsDeep options, { sub: true, pathPrefix: '/' }
+  
   io.socket.on name, (event) ->
     switch event.verb
       | "updated" => store.dispatch actions.update payload: (event.data <<< id: event.id)
@@ -55,7 +58,7 @@ export SailsCollection = (options) ->
       (dispatch) -> 
         dispatch actions.loading!
         
-        io.socket.post "/#{name}", payload, (resData, jwRes) ->
+        io.socket.post path.join(pathPrefix, "/#{name}"), payload, (resData, jwRes) ->
           if checkErr dispatch, jwRes, 201 then return
           dispatch actions.create parseDates jwRes.body
 
@@ -63,7 +66,7 @@ export SailsCollection = (options) ->
       (dispatch) -> 
         dispatch actions.loading!
         
-        io.socket.put "/#{name}/#{payload.id}", omit(payload, 'id'), (resData, jwRes) ->
+        io.socket.put path.join(pathPrefix, "/#{name}/#{payload.id}"), omit(payload, 'id'), (resData, jwRes) ->
           if checkErr dispatch, jwRes then return
           dispatch actions.update parseDates jwRes.body
                   
@@ -71,7 +74,7 @@ export SailsCollection = (options) ->
       (dispatch) ->
         dispatch actions.loading!
         
-        io.socket.delete "/#{name}/#{id}", (resData, jwRes) ->
+        io.socket.delete path.join(pathPrefix, "/#{name}/#{id}"), (resData, jwRes) ->
           if checkErr dispatch, jwRes then return
           dispatch actions.remove id: id
           
@@ -81,6 +84,8 @@ export SailsCollection = (options) ->
         
         query = "/#{name}?sort=createdAt DESC"
         if filter then query = "#{query}&where=#{JSON.stringify(filter)}"
+
+        query = path.join(pathPrefix, query)
 
         io.socket.get query, (resData, jwRes) ->
           if checkErr dispatch, jwRes then return

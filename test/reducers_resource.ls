@@ -155,7 +155,6 @@ describe 'reduxIntegration', ->
 
       resolve true
 
-
     specify 'update', -> new p (resolve,reject) ~> 
 
       @store.dispatch @actions.update id: 1, newattr: 'hello'

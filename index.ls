@@ -1,3 +1,4 @@
+#autocompile
 require! {
   leshdash: { defaultsDeep, push, pop, assign, pick, mapKeys, mapValues, assign, omit, map, curry, times, tail, reduce }
 }

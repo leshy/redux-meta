@@ -1,3 +1,4 @@
+#autocompile
 require! {
   leshdash: { defaultsDeep, map, mapValues, each, reduce }
   immutable: { fromJS: immutable }: i
@@ -9,7 +10,7 @@ maybeNext = (f) ->
 
 export Resource = maybeNext (options={}, next) ->
   { name } = options
-  (state, action) ->
+  ( state, action ) ->
 
     if not state then action = { verb: 'init' }
     else if action.type isnt "resource_#{ name }" then return state
@@ -25,7 +26,7 @@ export OrderedMap = maybeNext (options={}, next) ->
   Resource options, (state, action) ->
     switch action.verb
       | "init" => next { state: 'empty' }, action
-      | _ => if next then next(state, action) else state
+      | _ => next state, action
       
 export TailCollection = maybeNext (options={}, next) ->
   { limit } = defaultsDeep options, { limit: Infinity }
@@ -45,7 +46,8 @@ export TailCollection = maybeNext (options={}, next) ->
           data: if data.size <= limit then data else data.slice limit - data.size
           
       | _ => if next then next(state, action) else state
-    
+
+            
 export Collection = maybeNext (options={}, next) ->
   TailCollection options, (state, action) ->
     switch action.verb
@@ -78,5 +80,16 @@ export Collection = maybeNext (options={}, next) ->
           state: 'data'
           data: data.mergeIn [id], payload
           
-      | _ => if next then next(state, action) else state
+      | _ => next state, action
 
+export SeedCollection = maybeNext (options={}, next) ->
+  Collection options, (state, action) ->
+    { seed } = options
+    switch action.verb
+      | 'init' =>
+        if seed then next { state: 'data', data: seed }
+        else next state, action
+      | _ => next state, action
+
+      
+  

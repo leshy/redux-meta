@@ -16,6 +16,7 @@ require! {
   redux
   'redux-thunk'
 }
+
 io = require('sails.io.js')( require('socket.io-client')
 
 # will return
@@ -50,13 +51,14 @@ expect @store.getState()
 .to.deep.equal {"testmodel1":{"state":"loading"},"testmodel2":{"state":"empty"}}
 
 store.subscribe ->
+
   # after create my store looks something like:
   #
   # {
   #   testmodel1: { state: 'data', 
   #                 data: { 1: { name: 'model1', id: 1, size: 33 } }},
-  #   testmodel2: { state: 'empty'}
-  #  } 
+  #   testmodel2: { state: 'empty' }
+  # } 
   #
   # (store testmodel1 data attribute is an immutable.js OrderedMap
   # actual model data under the key is immutable.js Map
