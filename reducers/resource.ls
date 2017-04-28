@@ -41,9 +41,7 @@ export TailCollection = maybeNext (options={}, next) ->
         if not data then data = i.OrderedMap()
         data = data.set id, immutable payload
         
-        do
-          state: 'data'
-          data: if data.size <= limit then data else data.slice limit - data.size
+        next { state: 'data', data: if data.size <= limit then data else data.slice limit - data.size }, action
           
       | _ => next state, action
 
