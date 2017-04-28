@@ -66,7 +66,6 @@ describe 'reducerOutput', ->
 
         expect JSON.stringify @state.data
         .to.equal '{"4":{"id":4,"something":"else4"},"5":{"id":5,"something":"else5"},"6":{"id":6,"something":"else6"}}'
-
     
     describe 'remoteResource', -> Resource()
 

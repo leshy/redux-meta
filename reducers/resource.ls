@@ -1,8 +1,8 @@
 #autocompile
+
 require! {
   leshdash: { defaultsDeep, map, mapValues, each, reduce }
   immutable: { fromJS: immutable }: i
-
 }
 
 maybeNext = (f) ->
@@ -31,12 +31,12 @@ export OrderedMap = maybeNext (options={}, next) ->
 export TailCollection = maybeNext (options={}, next) ->
   { limit } = defaultsDeep options, { limit: Infinity }
   
-  OrderedMap options, (state,action) ->
+  OrderedMap options, (state, action) ->
     switch action.verb
       | 'create' =>
         { data } = state
         { payload } = action
-        { id } = payload
+        ({ id } = payload) or new Date!getTime!
 
         if not data then data = i.OrderedMap()
         data = data.set id, immutable payload
@@ -47,7 +47,7 @@ export TailCollection = maybeNext (options={}, next) ->
           
       | _ => if next then next(state, action) else state
 
-            
+                        
 export Collection = maybeNext (options={}, next) ->
   TailCollection options, (state, action) ->
     switch action.verb
@@ -70,25 +70,50 @@ export Collection = maybeNext (options={}, next) ->
           do
             state: 'data'
             data: data
-                
+      
       | 'update' =>
         { data } = state
         { payload } = action
         { id } = payload
-        
+
+        console.log "#{options.name} MERGING IN DATA", payload, "TO", id
         do
           state: 'data'
           data: data.mergeIn [id], payload
           
       | _ => next state, action
 
-export SeedCollection = maybeNext (options={}, next) ->
+export SortedCollection = maybeNext (options={}, next) ->
   Collection options, (state, action) ->
+    switch action.verb
+      | 'sort' =>
+        console.log "SORT ACTION",action
+        { sortBy, order } = sort = action.payload{ sortBy, order=1 }
+        console.log "SORT", sort
+
+        comparator = (x,y) ->
+          x = x.get(sortBy)
+          y = y.get(sortBy)
+          
+          console.log 'comparing',x,y
+          if x is y then return 0
+          if x < y then order else order * -1
+
+        if state.data.size then { state: 'data', data: state.data.sort(comparator), sort: sort }
+        else { state: 'empty', sort: sort } 
+        
+      | _ => next state, action
+
+
+export SeedCollection = maybeNext (options={}, next) ->
+  SortedCollection options, (state, action) ->
     { seed } = options
+    
     switch action.verb
       | 'init' =>
-        if seed then next { state: 'data', data: seed }
+        if seed then next { state: 'data', data: seed, sort: { sortBy: 'createdAt', order: 1 } }
         else next state, action
+        
       | _ => next state, action
 
       

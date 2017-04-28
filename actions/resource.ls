@@ -1,7 +1,7 @@
 #autocompile
 require! {
   moment
-  leshdash: { each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick, omit }
+  leshdash: { cbc, each, wait, union, assign, omit, map, curry, times, keys, cloneDeep, defaultsDeep, mapValues, pick, omit }
   path
 }
 
@@ -24,6 +24,7 @@ export Collection = (options) ->
   sa = SimpleAction options
   
   TailCollection(options) <<< do
+    sort: sa verb: 'sort'
     remove: sa verb: 'remove'
     replace: sa verb: 'replace'
     update: sa verb: 'update'
@@ -48,19 +49,28 @@ export SailsCollection = (options) ->
   { sub, name, io, pathPrefix } = defaultsDeep options, { sub: true, pathPrefix: '/' }
   
   io.socket.on name, (event) ->
+    
     switch event.verb
-      | "updated" => store.dispatch actions.update payload: (event.data <<< id: event.id)
-      | "created" => store.dispatch actions.push  payload: event.data
+      | "updated" =>
+        console.log "UPDATED",event
+        store.dispatch actions.update payload: (event.data <<< id: event.id)
+        
+      | "created" =>
+        console.log "CREATED",event
+        
+        store.dispatch actions.create payload: event.data
       | otherwise => console.error "received an unknown collection event", event
   
   actions = Collection(options) <<< do
-    remoteCreate: (payload) ->
+  
+    remoteCreate: (payload, callback) ->
       (dispatch) -> 
         dispatch actions.loading!
         
         io.socket.post path.join(pathPrefix, "/#{name}"), payload, (resData, jwRes) ->
-          if checkErr dispatch, jwRes, 201 then return
+          if checkErr dispatch, jwRes, 201 then cbc(callback,jwRes); return jwRes
           dispatch actions.create parseDates jwRes.body
+          cbc callback, void, jwRes
 
     remoteUpdate: (payload) ->
       (dispatch) -> 
