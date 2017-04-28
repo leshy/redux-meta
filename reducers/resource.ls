@@ -45,7 +45,7 @@ export TailCollection = maybeNext (options={}, next) ->
           state: 'data'
           data: if data.size <= limit then data else data.slice limit - data.size
           
-      | _ => if next then next(state, action) else state
+      | _ => next state, action
 
                         
 export Collection = maybeNext (options={}, next) ->
@@ -55,11 +55,11 @@ export Collection = maybeNext (options={}, next) ->
         { id } = action.payload
         data = state.data.remove id
         
-        if data.size then { state: 'data', data: data  }
-        else { state: 'empty' }
+        if data.size then next { state: 'data', data: data  }, action
+        else next { state: 'empty' }, action
 
       | 'replace' =>
-        if action.payload.length is 0 then { state: 'empty' }
+        if action.payload.length is 0 then next { state: 'empty' }, action
         else
 
           data = reduce do
@@ -67,9 +67,7 @@ export Collection = maybeNext (options={}, next) ->
             (data, {id}:model) -> data.set id, immutable model
             i.OrderedMap()
 
-          do
-            state: 'data'
-            data: data
+          next { state: 'data', data: data }, action
       
       | 'update' =>
         { data } = state
@@ -77,44 +75,43 @@ export Collection = maybeNext (options={}, next) ->
         { id } = payload
 
         console.log "#{options.name} MERGING IN DATA", payload, "TO", id
-        do
-          state: 'data'
-          data: data.mergeIn [id], payload
+        next { state: 'data' data: data.mergeIn [id], payload }, action
           
       | _ => next state, action
-
-export SortedCollection = maybeNext (options={}, next) ->
-  Collection options, (state, action) ->
-    switch action.verb
-      | 'sort' =>
-        console.log "SORT ACTION",action
-        { sortBy, order } = sort = action.payload{ sortBy, order=1 }
-        console.log "SORT", sort
-
-        comparator = (x,y) ->
-          x = x.get(sortBy)
-          y = y.get(sortBy)
-          
-          console.log 'comparing',x,y
-          if x is y then return 0
-          if x < y then order else order * -1
-
-        if state.data.size then { state: 'data', data: state.data.sort(comparator), sort: sort }
-        else { state: 'empty', sort: sort } 
-        
-      | _ => next state, action
-
 
 export SeedCollection = maybeNext (options={}, next) ->
-  SortedCollection options, (state, action) ->
+  Collection options, (state, action) ->
     { seed } = options
     
     switch action.verb
       | 'init' =>
-        if seed then next { state: 'data', data: seed, sort: { sortBy: 'createdAt', order: 1 } }
+        if seed then next { state: 'data', data: seed }, action
         else next state, action
         
       | _ => next state, action
-
-      
   
+
+export SortedSeedCollection = maybeNext (options={}, next) ->
+  SeedCollection options, (state, action) ->
+    
+    sort = ({ sortBy, sortOrder }) ->
+      if not sortBy then sortBy = options.sortBy or "createdAt"
+      if not sortOrder then sortOrder = options.sortOrder or 1
+
+      comparator = (x,y) ->
+        x = x.get sortBy
+        y = y.get sortBy
+        if x is y then return 0
+        if x < y then sortOrder else sortOrder * -1
+
+      if state.data.size then { state: 'data', data: state.data.sort(comparator) } <<< { sortOrder, sortBy }
+      else { state: 'empty' } <<< { sortOrder, sortBy }
+      
+    switch action.verb
+      | 'init'   => sort state
+      | 'create' => sort state
+      | 'update' => sort state
+      | 'remove' => sort state
+      | 'sort'   => sort state{ sortBy, sortOrder } <<< action.payload{ sortBy, sortOrder=1 }
+      | _ => next state, action
+
