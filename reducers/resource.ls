@@ -92,9 +92,9 @@ export SeedCollection = maybeNext (options={}, next) ->
 export SortedSeedCollection = maybeNext (options={}, next) ->
   SeedCollection options, (state, action) ->
     
-    sort = ({ sortBy, sortOrder }) ->
-      if not sortBy then sortBy = options.sortBy or "createdAt"
-      if not sortOrder then sortOrder = options.sortOrder or 1
+    sort = ({ sortBy, sortOrder, data }) ->
+      if not sortBy then sortBy = options.sortBy
+      if sortBy and not sortOrder then sortOrder = options.sortOrder or 1
 
       comparator = (x,y) ->
         x = x.get sortBy
@@ -102,7 +102,7 @@ export SortedSeedCollection = maybeNext (options={}, next) ->
         if x is y then return 0
         if x < y then sortOrder else sortOrder * -1
 
-      if state.data.size then { state: 'data', data: state.data.sort(comparator) } <<< { sortOrder, sortBy }
+      if state.data.size then { state: 'data', data: (if sortBy then data.sort(comparator) else data) } <<< { sortOrder, sortBy }
       else { state: 'empty' } <<< { sortOrder, sortBy }
       
     switch action.verb
@@ -112,4 +112,5 @@ export SortedSeedCollection = maybeNext (options={}, next) ->
       | 'remove' => sort state
       | 'sort'   => sort state{ sortBy, sortOrder } <<< action.payload{ sortBy, sortOrder=1 }
       | _ => next state, action
+
 
