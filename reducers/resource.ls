@@ -27,7 +27,8 @@ export OrderedMap = maybeNext (options={}, next) ->
     switch action.verb
       | "init" => next { state: 'empty' }, action
       | _ => next state, action
-      
+
+
 export TailCollection = maybeNext (options={}, next) ->
   { limit } = defaultsDeep options, { limit: Infinity }
   
@@ -87,7 +88,7 @@ export SeedCollection = maybeNext (options={}, next) ->
         else next state, action
         
       | _ => next state, action
-  
+      
 
 export SortedSeedCollection = maybeNext (options={}, next) ->
   SeedCollection options, (state, action) ->
@@ -105,12 +106,14 @@ export SortedSeedCollection = maybeNext (options={}, next) ->
       if state.data.size then { state: 'data', data: (if sortBy then data.sort(comparator) else data) } <<< { sortOrder, sortBy }
       else { state: 'empty' } <<< { sortOrder, sortBy }
       
-    switch action.verb
-      | 'init'   => sort state
-      | 'create' => sort state
-      | 'update' => sort state
-      | 'remove' => sort state
+    state = switch action.verb
+      | 'init'   => sort(state)
+      | 'create' => sort(state)
+      | 'update' => sort(state)
+      | 'remove' => sort(state)
       | 'sort'   => sort state{ sortBy, sortOrder } <<< action.payload{ sortBy, sortOrder=1 }
-      | _ => next state, action
+      | _ => state
+
+    next state, action
 
 
